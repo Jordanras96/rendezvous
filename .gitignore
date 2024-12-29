@@ -1,5 +1,4 @@
 # dependencies
-node_modules
 nextron-shadcn-app
 
 # logs
@@ -12,3 +11,21 @@ next-env.d.ts
 # build
 /application_build
 dist
+
+# Dependencies
+node_modules/
+
+# Environnement
+.env
+.env.local
+
+# Build
+.next/
+out/
+
+# Prisma
+/prisma/migrations/
+/prisma/*.db
+
+# Autres
+.DS_Store

@@ -1,5 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 function IndexPage() {
   return (
@@ -16,6 +18,12 @@ function IndexPage() {
       </h1>
       <p>With TypeScript, TailwindCSS and Shadcn/ui</p>
       <p>Crossbuild for Web or Desktop</p>
+      
+      <Link href="/users">
+        <Button className="mt-4">
+          Voir les utilisateurs
+        </Button>
+      </Link>
     </main>
   )
 }

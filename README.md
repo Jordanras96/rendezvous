@@ -1,74 +1,149 @@
-<p align="center"><img alt="web" src=".github/assets/web.png"></p>
-<h1 align="center"><a href="https://github.com/MaximePremont/boilerplate-nextron-shadcn">Boilerplate Nextron + Shadcn/ui</a></h1>
-<p align="center"><img alt="web" src=".github/assets/desktop.png"></p>
-<h1 align="center">Nextron ( Next.Js + Electron ) project boilerplate in TypeScript, with TailwindCSS + Shadcn/ui, web and desktop crossbuild</h1>
+# Application de Gestion Dentaire
 
-## Introduction
-This repository is a Nextron ( Next.Js + Electron ) project template in TypeScript with a Next.Js 14 App Router that includes TailwindCSS and the Shadcn/ui component library. This project is also configured so that the application can be built for both web and desktop versions with the same code.
+Cette application est une solution complète pour gérer les rendez-vous, les patients, les médicaments et les utilisateurs d'un cabinet dentaire. Elle est conçue pour être utilisée en réseau local et offre une interface conviviale pour les dentistes et les infirmières.
 
-The aim of this project is to enable anyone to quickly and easily start up a project using these technologies.
+## Fonctionnalités
+
+- **Gestion des Utilisateurs** :
+  - Création, modification, suppression d'utilisateurs (dentistes, infirmières, administrateurs).
+  - Attribution de rôles (ADMIN, DOCTOR, NURSE, USER).
+  - Sécurisation des mots de passe avec bcrypt.
+
+- **Gestion des Patients** :
+  - Création, modification, suppression de patients.
+  - Fiche médicale pour chaque patient avec historique des soins.
+
+- **Gestion des Rendez-vous** :
+  - Planification, modification, annulation des rendez-vous.
+  - Statut des rendez-vous (PENDING, CONFIRMED, CANCELLED, COMPLETED).
+
+- **Gestion des Médicaments** :
+  - Suivi du stock de médicaments.
+  - Historique des mouvements de stock (entrées/sorties).
+
+- **Gestion des Factures** :
+  - Création et suivi des factures pour chaque patient.
+  - Gestion des paiements et des arriérés.
+
+- **Gestion des Assurances** :
+  - Suivi des informations d'assurance des patients.
+  - Partenariats avec des assurances santé.
+
+## Technologies Utilisées
+
+- **Frontend** :
+  - [Next.js](https://nextjs.org/) : Framework React pour le rendu côté serveur et la génération de pages statiques.
+  - [TailwindCSS](https://tailwindcss.com/) : Framework CSS utilitaire pour le style.
+  - [shadcn/ui](https://ui.shadcn.com/) : Composants UI modernes et personnalisables.
+  - [Axios](https://axios-http.com/) : Client HTTP pour les appels API.
+
+- **Backend** :
+  - [Express.js](https://expressjs.com/) : Framework Node.js pour la création d'API.
+  - [Prisma](https://www.prisma.io/) : ORM pour la gestion de la base de données.
+  - [PostgreSQL](https://www.postgresql.org/) : Base de données relationnelle.
+  - [bcryptjs](https://www.npmjs.com/package/bcryptjs) : Bibliothèque pour le hachage des mots de passe.
+
+- **Autres** :
+  - [TypeScript](https://www.typescriptlang.org/) : Langage de programmation typé pour JavaScript.
+  - [Electron](https://www.electronjs.org/) : Framework pour créer des applications desktop.
+
 ## Installation
-**How to create a new application with this template ?**  
-There are two ways to create a new project with this template. This project uses and runs under Node 20, so it's advisable to use [NVM](https://github.com/nvm-sh/nvm) to manage and use the correct version of Node.
-### Installation method 1 ( recommanded! ) :
-To create a new project, use the command below :
-```
-# with npx
-$ npx install-nextron-shadcn-boilerplate
 
-# with yarn
-$ SOON
+### Prérequis
 
-# with pnpm
-$ SOON
-```
-### Installation method 2 :
-On GitHub, select this repository as a template.
-### Installation method 3 :
-To create a new project, just copy it by running :
-```
-git clone git@github.com:MaximePremont/boilerplate-nextron-shadcn.git
-```
-**Then, install depedencies by running `npm install` in the project folder.**
-## Usage
-### Run Next ( web application ) in dev mode :
-You can use `npm run next:dev` to start a next web application in development mode with hot reload.
-### Run Electron ( desktop application ) in dev mode :
-You can use `npm run electron:dev` to start an electron desktop application in development mode with hot reload.
-### Build & Start Next ( web application ) :
-You can build your next web application by using `npm run next:build`. Then you can start it in production mode with `npm run next:start`.
-### Build Electron ( desktop application ) :
-You can build your Electron desktop application on different systems by using the commands bellow :
-```
-npm run electron:build-current        Build for current system
-npm run electron:build-all            Build on all systems
-npm run electron:build-win32          Build on Windows x32
-npm run electron:build-win64          Build on Windows x64
-npm run electron:build-linux          Build for linux*
-npm run electron:build-mac            Build for MacOs**
-npm run electron:build-mac-universal  Universal build for MacOs**
-```
-*For linux, you can change the package type ( snap, deb... ) by editing the [electron-builder.yml](./electron-builder.yml) file. You may need to install some packages ( for exemple rmp to build a `rpm`).
+- [Node.js](https://nodejs.org/) (version 16 ou supérieure)
+- [PostgreSQL](https://www.postgresql.org/) (version 12 ou supérieure)
+- [Git](https://git-scm.com/)
 
-**MacOs versions can only be build using a Mac.
+### Étapes
 
-**For full usage, please read the [Nextron documentation](https://github.com/saltyshiomix/nextron).**
-## Shadcn/ui
-To install Shadcn/ui components, just use `npx shadcn@latest add MY-COMPONENT` as explained in the [official documentation](https://ui.shadcn.com/docs/installation/next).
-## Code format
-Eslint and Prettier are installed and configured to work with the project. Feel free to edit configuration files according to your preferences.
+1. **Cloner le dépôt** :
+   ```bash
+   git clone https://github.com/votre-nom-utilisateur/dentist-app.git
+   cd dentist-app
+    ```
+ 2.  **Installer les dépendances** :
+    ```bash
+    npm install
+    ```
+ 3.  **Configurer la base de données** :
 
-_Please note that contributors to this project must adhere to the defined standard._
-## Contributing
-Feel free to improve this project by developing ( [contribution guide](#) ) or participating in [community discussions](https://github.com/MaximePremont/boilerplate-nextron-shadcn/discussions).
-## Maintainers
-- [Maxime Premont](https://github.com/MaximePremont)
-## License
-This project in under the [MIT License](./LICENSE).
-## Related
-- [nextron](https://github.com/saltyshiomix/nextron)
-- [shadcn-ui](https://github.com/shadcn-ui/ui)
+    - Créez un fichier .env à la racine du projet.
+    - Ajoutez la variable DATABASE_URL avec l'URL de votre base de données PostgreSQL :
+    ```env
+        DATABASE_URL="postgresql://user:password@localhost:5432/dentist_app"
+    ```
+ 4. **Exécuter les migrations Prisma** :
+    ```bash
+    npx prisma migrate dev --name init
+    ```
+ 5. **Démarrer le serveur** :
+    ```bash
+    npm run dev
+    ```
+ 6. **Accéder à l'application** :
 
----
+    - [Frontend] : Ouvrez votre navigateur et allez à http://localhost:3000.
+    - [Backend] : L'API est disponible à http://localhost:3000/api.
 
-#### This project was helpfull ? Don't forget to leave a star, thank you ! ⭐
+## Structure du Projet
+
+    ```env
+    rendezvous/
+        ├── app/                  # Pages et composants Next.js
+        ├── api/                  # Routes API Express.js
+        ├── components/           # Composants React réutilisables
+        ├── prisma/               # Schéma Prisma et migrations
+        ├── public/               # Fichiers statiques (images, etc.)
+        ├── styles/               # Fichiers CSS ou Tailwind
+        ├── .env                  # Variables d'environnement
+        ├── .gitignore            # Fichiers ignorés par Git
+        ├── package.json          # Dépendances et scripts
+        ├── README.md             # Documentation du projet
+        └── tsconfig.json         # Configuration TypeScript
+    ```
+
+## Contribuer
+
+Les contributions sont les bienvenues ! Voici comment vous pouvez contribuer au projet :
+
+1. **Forker le dépôt : Cliquez sur le bouton "Fork" en haut à droite de la page du dépôt**.
+
+2. **Cloner votre fork** :
+    
+    ```bash
+    git clone https://github.com/votre-nom-utilisateur/dentist-app.git
+    cd dentist-app
+    ``
+3. **Créer une branche** :
+    ```bash
+    git checkout -b feature/nom-de-la-fonctionnalite
+    ```
+4. **Faire des modifications** : Ajoutez vos fonctionnalités ou corrections.
+
+5. **Commiter vos changements** :
+    ```bash
+    git add .
+    git commit -m "Description de vos modifications"
+    ```
+6. **Pousser vos changements** :
+    ```bash
+    git push origin feature/nom-de-la-fonctionnalite
+    ```
+7. **Ouvrir une Pull Request** : Allez sur GitHub et ouvrez une Pull Request depuis votre branche.
+
+## Licence
+
+Ce projet est sous licence [MIT](https://chat.deepseek.com/a/chat/s/LICENSE). Voir le fichier LICENSE pour plus de détails.
+
+## Auteur
+
+Jordan Ny Riantsoa RASOLOARISON - [Jordanras96](https://github.com/Jordanras96)
+
+## Remerciements
+
+Merci à [Prisma](https://www.prisma.io/) pour leur excellent ORM.
+
+Merci à [TailwindCSS](https://tailwindcss.com/) pour leur framework CSS utilitaire.
+
+Merci à [shadcn/ui](https://ui.shadcn.com/) pour leurs composants UI modernes.

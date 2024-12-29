@@ -1,0 +1,225 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  appointments Appointment[] @relation("DoctorAppointments")
+  nurseAppts   Appointment[] @relation("NurseAppointments")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  auth_session Session[]
+  key          Key[]
+}
+
+model Key {
+  id              String  @id @default(cuid())
+  hashed_password String?
+  role            Role    @default(USER)
+  user_id         String
+  user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model Session {
+  id             String @id @unique
+  user_id        String
+  active_expires BigInt
+  idle_expires   BigInt
+  user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Patient {
+  id             String           @id @default(cuid())
+  firstName      String
+  lastName       String
+  dateOfBirth    DateTime
+  gender         Gender
+  phone          String
+  email          String?
+  address        String?
+  allergies      String[]
+  insuranceInfo  Insurance?
+  medicalHistory MedicalHistory[]
+  appointments   Appointment[]
+  photos         PatientPhoto[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Insurance {
+  id               String   @id @default(cuid())
+  patientId        String   @unique
+  patient          Patient  @relation(fields: [patientId], references: [id])
+  insuranceCompany String
+  policyNumber     String
+  coveragePercent  Float
+  validUntil       DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model PatientPhoto {
+  id          String    @id @default(cuid())
+  patientId   String
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  type        PhotoType
+  url         String
+  description String?
+  uploadedBy  String
+  createdAt   DateTime  @default(now())
+}
+
+model MedicalHistory {
+  id          String    @id @default(cuid())
+  patientId   String
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  operation   Operation @relation(fields: [operationId], references: [id])
+  operationId String
+  notes       String?
+  createdAt   DateTime  @default(now())
+}
+
+model Operation {
+  id               String                @id @default(cuid())
+  name             String
+  description      String?
+  medicalHistories MedicalHistory[]
+  medicaments      MedicamentOperation[]
+  price            Float
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  date      DateTime
+  status    Status   @default(PENDING)
+  doctorId  String
+  patientId String
+  nurseId   String
+  notes     String?
+  doctor    User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  nurse     User     @relation("NurseAppointments", fields: [nurseId], references: [id])
+  payment   Payment?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  appointmentId   String        @unique
+  appointment     Appointment   @relation(fields: [appointmentId], references: [id])
+  amount          Float
+  installments    Int           @default(1)
+  paidAmount      Float         @default(0)
+  nextPaymentDate DateTime?
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Supplier {
+  id          String                @id @default(cuid())
+  name        String
+  contact     String
+  email       String?
+  phone       String
+  address     String?
+  medicaments MedicamentInventory[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+}
+
+model MedicamentInventory {
+  id          String                @id @default(cuid())
+  name        String
+  description String?
+  quantity    Int
+  supplierId  String
+  supplier    Supplier              @relation(fields: [supplierId], references: [id])
+  unitPrice   Float
+  movements   InventoryMovement[]
+  operations  MedicamentOperation[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+}
+
+model InventoryMovement {
+  id           String              @id @default(cuid())
+  medicamentId String
+  medicament   MedicamentInventory @relation(fields: [medicamentId], references: [id])
+  type         MovementType
+  quantity     Int
+  date         DateTime
+  notes        String?
+  createdAt    DateTime            @default(now())
+}
+
+model MedicamentOperation {
+  id           String              @id @default(cuid())
+  medicamentId String
+  medicament   MedicamentInventory @relation(fields: [medicamentId], references: [id])
+  operationId  String
+  operation    Operation           @relation(fields: [operationId], references: [id])
+  quantity     Int
+  createdAt    DateTime            @default(now())
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  NURSE
+  USER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  COMPLETED
+  CANCELLED
+}
+
+enum PhotoType {
+  PROFILE
+  DENTAL
+  XRAY
+  OTHER
+}
+
+enum MovementType {
+  IN
+  OUT
+}
