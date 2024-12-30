@@ -96,63 +96,64 @@ app.post('/api/users', async (req: Request, res: Response): Promise<Response> =>
       }
     });
 
-      // Modification d'un utilisateur
-      app.put('/api/users/:id', async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
-        const { username, password, role } = req.body;
-      
-        try {
-          // Vérifier si l'utilisateur existe
-          const userExists = await prisma.user.findUnique({
-            where: { id },
-            include: { key: true },
-          });
-      
-          if (!userExists) {
-            res.status(404).json({ error: "Utilisateur non trouvé" });
-            return; // Arrêter l'exécution de la fonction
-          }
-      
-          // Préparer les données de mise à jour
-          let updateData: any = { username };
-      
-          if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-      
-            // Vérifier si l'utilisateur a une clé associée
-            if (!userExists.key || userExists.key.length === 0) {
-              res.status(400).json({ error: "Aucune clé associée à cet utilisateur" });
-              return; // Arrêter l'exécution de la fonction
-            }
-      
-            // Mettre à jour la clé associée
-            const keyId = userExists.key[0].id; // Prendre l'ID de la première clé
-            updateData.key = {
-              update: {
-                where: { id: keyId }, // Spécifier l'ID de la clé à mettre à jour
-                data: {
-                  hashed_password: hashedPassword,
-                  role: role as Role,
-                },
-              },
-            };
-          }
-      
-          // Mettre à jour l'utilisateur
-          const user = await prisma.user.update({
-            where: { id },
-            data: updateData,
-            include: {
-              key: true,
-            },
-          });
-      
-          res.json(user); // Envoyer la réponse
-        } catch (error) {
-          console.error("Erreur détaillée :", error);
-          res.status(400).json({error});
-        }
-      });
+      // Mettre à jour un utilisateur
+app.put('/api/users/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { username, password, role } = req.body;
+
+  try {
+    // Vérifier si l'utilisateur existe
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { key: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    // Préparer les données de mise à jour
+    const updateData: any = { username };
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.key = {
+        update: {
+          where: { id: user.key[0].id }, // Mettre à jour la première clé associée
+          data: {
+            hashed_password: hashedPassword,
+          },
+        },
+      };
+    }
+
+    if (role) {
+      // Mettre à jour le rôle dans la clé associée
+      updateData.key = {
+        update: {
+          where: { id: user.key[0].id }, // Mettre à jour la première clé associée
+          data: {
+            role: role as Role,
+          },
+        },
+      };
+    }
+
+    // Mettre à jour l'utilisateur
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: updateData,
+      include: {
+        key: true,
+      },
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'utilisateur", error);
+    res.status(500).json({ error: "Erreur lors de la mise à jour de l'utilisateur" });
+  }
+});
 
       // Suppression d'un utilisateur
 app.delete('/api/users/:id', async (req, res) => {
@@ -183,6 +184,26 @@ app.delete('/api/users/:id', async (req, res) => {
       res.status(400).json({ error: "Erreur lors de la suppression des utilisateurs" });
     }
   });
+
+  // Vérification en temps réel de l'existence du nom d'utilisateur
+app.get('/api/users/check-username', async (req: Request, res: Response) => {
+  const { username } = req.query;
+
+  if (!username) {
+    return res.status(400).json({ error: "Le paramètre 'username' est requis" });
+  }
+
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { username: username as string },
+    });
+
+    res.json({ exists: !!existingUser }); // Renvoie true si l'utilisateur existe, sinon false
+  } catch (error) {
+    console.error("Erreur lors de la vérification du nom d'utilisateur", error);
+    res.status(500).json({ error: "Erreur lors de la vérification du nom d'utilisateur" });
+  }
+});
   
   // Démarrer le serveur
   app.listen(PORT, () => {

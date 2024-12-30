@@ -24,7 +24,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
-import { createUser } from '@/app/api/index' // Importez la fonction createUser
+import { createUser, checkUsername } from '@/app/api/index' // Importez la fonction createUser
+import debounce from 'lodash.debounce'
 
 // Définition du schéma de validation avec les rôles du schema Prisma
 const FormSchema = z.object({
@@ -49,6 +50,7 @@ export default function NewUserPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [usernameExists, setUsernameExists] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -59,37 +61,52 @@ export default function NewUserPage() {
     }
   })
 
+  
+  // Vérifier si le nom d'utilisateur existe déjà
+  const handleCheckUsername = async (username: string) => {
+    if (username.length >= 2) {
+      try {
+        const exists = await checkUsername(username);
+        setUsernameExists(exists);
+      } catch (error) {
+        console.error("Erreur lors de la vérification du nom d'utilisateur", error);
+      }
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
+    if (usernameExists) {
+      toast({
+        title: 'Erreur',
+        description:
+          "Le nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
+        variant: 'destructive'
+      })
+      return
+    }
+
     try {
       setIsSubmitting(true)
-
-      // Utilisez la fonction createUser pour créer l'utilisateur
       const newUser = await createUser(data)
-
       toast({
         title: 'Utilisateur créé avec succès',
         description: `L'utilisateur ${newUser.username} a été créé.`,
         variant: 'default'
       })
-
-      router.push('/users') // Redirection vers la liste des utilisateurs
-      router.refresh() // Rafraîchit les données
+      router.push('/users')
+      router.refresh()
     } catch (error) {
       console.error('Erreur :', error)
 
-      // Afficher un toast d'erreur spécifique si le nom d'utilisateur existe déjà
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.error === "Le nom d'utilisateur existe déjà"
-      ) {
+      if (error.response && error.response.data) {
+        // Afficher un message d'erreur spécifique de l'API
         toast({
           title: 'Erreur',
-          description:
-            "Le nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
+          description: error.response.data.error || 'Une erreur est survenue',
           variant: 'destructive'
         })
       } else {
+        // Afficher un message d'erreur générique
         toast({
           title: 'Erreur',
           description:
@@ -126,8 +143,14 @@ export default function NewUserPage() {
                     placeholder="Entrez le nom d'utilisateur"
                     {...field}
                     disabled={isSubmitting}
+                    onBlur={(e) => handleCheckUsername(e.target.value)} // Déclencher la vérification lors du onBlur
                   />
                 </FormControl>
+                {usernameExists && (
+                  <p className="text-sm text-red-500">
+                    Ce nom d'utilisateur existe déjà.
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -185,7 +208,7 @@ export default function NewUserPage() {
           <div className="flex gap-4">
             <Button
               type="submit"
-              disabled={isSubmitting}>
+              disabled={isSubmitting || usernameExists}>
               {isSubmitting ? 'Création...' : "Créer l'utilisateur"}
             </Button>
             <Button

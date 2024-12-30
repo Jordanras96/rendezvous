@@ -22,6 +22,8 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { getUsers, deleteUser, deleteMultipleUsers } from '@/app/api/users'
+import { Filter, PencilIcon, Trash2Icon, X } from 'lucide-react'
+import EditUserDialog from '@/components/EditUserForm'
 
 export default function UsersPage() {
   const router = useRouter()
@@ -41,7 +43,7 @@ export default function UsersPage() {
       const response = await getUsers({
         page,
         limit,
-        role: roleFilter === 'ALL' ? undefined: roleFilter,
+        role: roleFilter === 'ALL' ? undefined : roleFilter,
         username: usernameFilter
       })
       setUsers(response.users)
@@ -204,8 +206,8 @@ export default function UsersPage() {
         <Select
           value={roleFilter}
           onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrer par rôle" />
+          <SelectTrigger className="w-[80px]">
+            <SelectValue placeholder={<Filter size={20} />} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Tous les rôles</SelectItem>
@@ -235,12 +237,19 @@ export default function UsersPage() {
                   <p className="text-sm text-gray-500">{user.key[0]?.role}</p>
                 </div>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDeleteUser(user.id)}>
-                Supprimer
-              </Button>
+              <div className="flex gap-2">
+                <EditUserDialog
+                  user={user}
+                  onUpdate={fetchUsers}
+                />{' '}
+                {/* Ajoutez le Dialog ici */}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteUser(user.id)}>
+                  <Trash2Icon />
+                </Button>
+              </div>
             </div>
           ))
         )}
