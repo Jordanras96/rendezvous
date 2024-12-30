@@ -24,6 +24,8 @@ import { useRouter } from 'next/navigation'
 import { getUsers, deleteUser, deleteMultipleUsers } from '@/app/api/users'
 import { Filter, PencilIcon, Trash2Icon, X } from 'lucide-react'
 import EditUserDialog from '@/components/EditUserForm'
+import { DataTable } from './data-table'
+import { columns } from './columns'
 
 export default function UsersPage() {
   const router = useRouter()
@@ -38,7 +40,7 @@ export default function UsersPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   // Récupérer la liste des utilisateurs
-  const fetchUsers = async () => {
+   const fetchUsers = async () => {
     try {
       const response = await getUsers({
         page,
@@ -155,125 +157,132 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Liste des Utilisateurs</h1>
-        <div className="flex gap-4">
-          <Dialog
-            open={isDeleteDialogOpen}
-            onOpenChange={setIsDeleteDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="destructive"
-                disabled={selectedUsers.length === 0}>
-                Supprimer les utilisateurs sélectionnés
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Confirmer la suppression</DialogTitle>
-                <DialogDescription>
-                  Êtes-vous sûr de vouloir supprimer les utilisateurs
-                  sélectionnés ? Cette action est irréversible.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteMultipleUsers}>
-                  Supprimer
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button onClick={() => router.push('/users/new')}>
-            Créer un nouvel utilisateur
-          </Button>
-        </div>
-      </div>
+    // <div className="container mx-auto p-6">
+    //   <div className="mb-6 flex items-center justify-between">
+    //     <h1 className="text-2xl font-bold">Liste des Utilisateurs</h1>
+    //     <div className="flex gap-4">
+    //       <Dialog
+    //         open={isDeleteDialogOpen}
+    //         onOpenChange={setIsDeleteDialogOpen}>
+    //         <DialogTrigger asChild>
+    //           <Button
+    //             variant="destructive"
+    //             disabled={selectedUsers.length === 0}>
+    //             Supprimer les utilisateurs sélectionnés
+    //           </Button>
+    //         </DialogTrigger>
+    //         <DialogContent>
+    //           <DialogHeader>
+    //             <DialogTitle>Confirmer la suppression</DialogTitle>
+    //             <DialogDescription>
+    //               Êtes-vous sûr de vouloir supprimer les utilisateurs
+    //               sélectionnés ? Cette action est irréversible.
+    //             </DialogDescription>
+    //           </DialogHeader>
+    //           <DialogFooter>
+    //             <Button
+    //               variant="outline"
+    //               onClick={() => setIsDeleteDialogOpen(false)}>
+    //               Annuler
+    //             </Button>
+    //             <Button
+    //               variant="destructive"
+    //               onClick={handleDeleteMultipleUsers}>
+    //               Supprimer
+    //             </Button>
+    //           </DialogFooter>
+    //         </DialogContent>
+    //       </Dialog>
+    //       <Button onClick={() => router.push('/users/new')}>
+    //         Créer un nouvel utilisateur
+    //       </Button>
+    //     </div>
+    //   </div>
 
-      <div className="mb-6 flex gap-4">
-        <Input
-          placeholder="Filtrer par nom d'utilisateur"
-          value={usernameFilter}
-          onChange={e => setUsernameFilter(e.target.value)}
-        />
-        <Select
-          value={roleFilter}
-          onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-[80px]">
-            <SelectValue placeholder={<Filter size={20} />} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Tous les rôles</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="DOCTOR">Médecin</SelectItem>
-            <SelectItem value="NURSE">Infirmier(e)</SelectItem>
-            <SelectItem value="USER">Utilisateur</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    //   <div className="mb-6 flex gap-4">
+    //     <Input
+    //       placeholder="Filtrer par nom d'utilisateur"
+    //       value={usernameFilter}
+    //       onChange={e => setUsernameFilter(e.target.value)}
+    //     />
+    //     <Select
+    //       value={roleFilter}
+    //       onValueChange={setRoleFilter}>
+    //       <SelectTrigger className="w-[80px]">
+    //         <SelectValue placeholder={<Filter size={20} />} />
+    //       </SelectTrigger>
+    //       <SelectContent>
+    //         <SelectItem value="ALL">Tous les rôles</SelectItem>
+    //         <SelectItem value="ADMIN">Admin</SelectItem>
+    //         <SelectItem value="DOCTOR">Médecin</SelectItem>
+    //         <SelectItem value="NURSE">Infirmier(e)</SelectItem>
+    //         <SelectItem value="USER">Utilisateur</SelectItem>
+    //       </SelectContent>
+    //     </Select>
+    //   </div>
 
-      <div className="space-y-4">
-        {users.length === 0 ? (
-          <p>Aucun utilisateur trouvé.</p>
-        ) : (
-          users.map(user => (
-            <div
-              key={user.id}
-              className="flex items-center justify-between rounded-lg border p-4">
-              <div className="flex items-center gap-4">
-                <Checkbox
-                  checked={selectedUsers.includes(user.id)}
-                  onCheckedChange={() => handleSelectUser(user.id)}
-                />
-                <div>
-                  <p className="font-medium">{user.username}</p>
-                  <p className="text-sm text-gray-500">{user.key[0]?.role}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <EditUserDialog
-                  user={user}
-                  onUpdate={fetchUsers}
-                />{' '}
-                {/* Ajoutez le Dialog ici */}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDeleteUser(user.id)}>
-                  <Trash2Icon />
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+    //   <div className="space-y-4">
+    //     {users.length === 0 ? (
+    //       <p>Aucun utilisateur trouvé.</p>
+    //     ) : (
+    //       users.map(user => (
+    //         <div
+    //           key={user.id}
+    //           className="flex items-center justify-between rounded-lg border p-4">
+    //           <div className="flex items-center gap-4">
+    //             <Checkbox
+    //               checked={selectedUsers.includes(user.id)}
+    //               onCheckedChange={() => handleSelectUser(user.id)}
+    //             />
+    //             <div>
+    //               <p className="font-medium">{user.username}</p>
+    //               <p className="text-sm text-gray-500">{user.key[0]?.role}</p>
+    //             </div>
+    //           </div>
+    //           <div className="flex gap-2">
+    //             <EditUserDialog
+    //               user={user}
+    //               onUpdate={fetchUsers}
+    //             />{' '}
+    //             {/* Ajoutez le Dialog ici */}
+    //             <Button
+    //               variant="destructive"
+    //               size="sm"
+    //               onClick={() => handleDeleteUser(user.id)}>
+    //               <Trash2Icon />
+    //             </Button>
+    //           </div>
+    //         </div>
+    //       ))
+    //     )}
+    //   </div>
 
-      <div className="mt-6 flex items-center justify-between">
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}>
-            Précédent
-          </Button>
-          <Button
-            variant="outline"
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}>
-            Suivant
-          </Button>
-        </div>
-        <p>
-          Page {page} sur {totalPages}
-        </p>
-      </div>
-    </div>
+    //   <div className="mt-6 flex items-center justify-between">
+    //     <div className="flex gap-4">
+    //       <Button
+    //         variant="outline"
+    //         disabled={page === 1}
+    //         onClick={() => setPage(page - 1)}>
+    //         Précédent
+    //       </Button>
+    //       <Button
+    //         variant="outline"
+    //         disabled={page === totalPages}
+    //         onClick={() => setPage(page + 1)}>
+    //         Suivant
+    //       </Button>
+    //     </div>
+    //     <p>
+    //       Page {page} sur {totalPages}
+    //     </p>
+    //   </div>
+    // </div>
+    <DataTable
+      columns={columns}
+      data={users}
+      loading={isLoading}
+      onDeleteMultiple={handleDeleteMultipleUsers}
+      pagination={{ page, totalPages, onPageChange: setPage }}
+    />
   )
 }
