@@ -26,6 +26,14 @@ import { Filter, PencilIcon, Trash2Icon, X } from 'lucide-react'
 import EditUserDialog from '@/components/EditUserForm'
 import { DataTable } from './data-table'
 import { columns } from './columns'
+import NewUserPage from '@/components/NewUserForm'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
 
 export default function UsersPage() {
   const router = useRouter()
@@ -40,7 +48,7 @@ export default function UsersPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   // Récupérer la liste des utilisateurs
-   const fetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
       const response = await getUsers({
         page,
@@ -150,6 +158,21 @@ export default function UsersPage() {
         variant: 'destructive'
       })
     }
+  }
+
+  // Rafraîchir la liste des utilisateurs
+  const handleRefresh = () => {
+    fetchUsers()
+  }
+  // Gérer le changement de page
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+  }
+
+  // Gérer le changement de taille de page
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize)
+    setPage(1) // Revenir à la première page après avoir changé la taille de la page
   }
 
   if (isLoading) {
@@ -277,12 +300,29 @@ export default function UsersPage() {
     //     </p>
     //   </div>
     // </div>
-    <DataTable
-      columns={columns}
-      data={users}
-      loading={isLoading}
-      onDeleteMultiple={handleDeleteMultipleUsers}
-      pagination={{ page, totalPages, onPageChange: setPage }}
-    />
+    <Card className="container mx-auto p-6">
+      <CardHeader className="flex items-center justify-between">
+        <CardTitle className="text-2xl font-bold">
+          Liste des utilisateurs
+        </CardTitle>
+        <CardDescription className="">
+          <NewUserPage onUserCreated={handleRefresh} />{' '}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <DataTable
+          columns={columns({ onRefresh: handleRefresh })} // Passer la fonction de rafraîchissement
+          data={users}
+          loading={isLoading}
+          onDeleteMultiple={handleDeleteMultipleUsers}
+          page={page}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          totalPages={totalPages}
+          setUsernameFilter={setUsernameFilter}
+          setRoleFilter={setRoleFilter}
+        />
+      </CardContent>
+    </Card>
   )
 }

@@ -1,10 +1,11 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
-import { PencilIcon, Trash2Icon } from 'lucide-react'
+import { ArrowUpDownIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { deleteUser, getUsers } from '../api'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import EditUserDialog from '@/components/EditUserForm'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export type User = {
   id: string
@@ -12,14 +13,58 @@ export type User = {
   role: string
 }
 
-export const columns: ColumnDef<User>[] = [
+export const columns = ({
+  onRefresh
+}: {
+  onRefresh?: () => void
+}): ColumnDef<User>[] => [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() ? 'indeterminate' : false)
+        }
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={value => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false
+  },
   {
     accessorKey: 'username',
-    header: "Nom d'utilisateur"
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Username
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    }
   },
   {
     accessorKey: 'role',
-    header: 'Rôle'
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Role
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    }
   },
   {
     accessorKey: 'createdAt',
@@ -33,6 +78,7 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: 'actions',
+    header: 'Actions',
     cell: ({ row }) => {
       const [users, setUsers] = useState([])
       const { toast } = useToast()
@@ -42,6 +88,7 @@ export const columns: ColumnDef<User>[] = [
       const [usernameFilter, setUsernameFilter] = useState('')
       const [totalPages, setTotalPages] = useState(1)
       const [isLoading, setIsLoading] = useState(true)
+      const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
       const fetchUsers = async () => {
         try {
@@ -93,6 +140,9 @@ export const columns: ColumnDef<User>[] = [
             description: `L'utilisateur "${userToDelete.username}" a été supprimé avec succès.`,
             variant: 'default'
           })
+
+          // Rafraîchir la liste des utilisateurs
+          if (onRefresh) onRefresh()
         } catch (error) {
           console.error("Erreur lors de la suppression de l'utilisateur", error)
           toast({
@@ -108,15 +158,17 @@ export const columns: ColumnDef<User>[] = [
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => (
-              //   handleEditUser(row.original.id)
-              <EditUserDialog
-                user={row.original.id}
-                onUpdate={fetchUsers}
-              />
-            )}>
-            <PencilIcon className="h-4 w-4" />
+            // onClick={() => setIsEditDialogOpen(true)}
+          >
+            <EditUserDialog
+              user={row.original}
+              isOpen={isEditDialogOpen}
+              onOpenChange={setIsEditDialogOpen}
+              onUpdate={() => onRefresh()}
+            />
+            {/* <PencilIcon className="h-4 w-4" /> */}
           </Button>
+
           <Button
             variant="destructive"
             size="sm"

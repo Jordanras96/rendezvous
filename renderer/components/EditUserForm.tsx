@@ -48,12 +48,15 @@ type FormData = z.infer<typeof FormSchema>
 
 export default function EditUserDialog({
   user,
+  isOpen,
+  onOpenChange,
   onUpdate
 }: {
   user: any
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
   onUpdate: () => void
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -79,7 +82,7 @@ export default function EditUserDialog({
         description: `L'utilisateur ${data.username} a été mis à jour.`,
         variant: 'default'
       })
-      setIsOpen(false) // Fermer le dialog après la mise à jour
+      onOpenChange(false) // Utiliser onOpenChange pour fermer le dialogue
       onUpdate() // Rafraîchir la liste des utilisateurs
     } catch (error) {
       console.error('Erreur :', error)
@@ -97,7 +100,7 @@ export default function EditUserDialog({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={setIsOpen}>
+      onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">
           <Pencil />
@@ -182,7 +185,6 @@ export default function EditUserDialog({
                 </FormItem>
               )}
             />
-
             <DialogFooter>
               <Button
                 type="submit"
@@ -192,7 +194,7 @@ export default function EditUserDialog({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsOpen(false)}
+                onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}>
                 Annuler
               </Button>
